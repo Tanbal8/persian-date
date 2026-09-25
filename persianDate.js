@@ -17,6 +17,10 @@ class PersianDate {
         }
         this.setDate(year, month, day, dayNumber);
     }
+
+
+    // Next
+    
     nextDay() {
         const newDate = this.copy();
         newDate.day++;
@@ -28,23 +32,11 @@ class PersianDate {
         else newDate._updateInformation();
         return newDate;
     }
-    previousDay() {
-        const newDate = this.copy();
-        newDate.day--;
-        newDate.dayNumber = newDate.dayNumber > 0 ? newDate.dayNumber - 1 : 6;
-        if (newDate.day < 1) {
-            if (newDate.month === 1) newDate.setDate(newDate.year - 1, 12, newDate.isLeapYear(newDate.year - 1) ? 30 : 29)
-            else newDate.setDate(newDate.year, newDate.month - 1, newDate.calculateMonthDays());
-        }
-        else newDate._updateInformation();
-        return newDate;
-    }
+
     nextWeek() {
         return this.next('day', 7);
     }
-    previousWeek() {
-        return this.previous('day', 7);
-    }
+
     nextMonth() {
         const newDate = this.copy();
         newDate.month++;
@@ -57,17 +49,7 @@ class PersianDate {
         newDate._updateInformation();
         return newDate;
     }
-    previousMonth() {
-        const newDate = this.copy();
-        newDate.month--;
-        if (newDate.month < 1) {
-            newDate.month = 12;
-            newDate.year--;
-        }
-        if (newDate.day > newDate.calculateMonthDays()) newDate.day = newDate.calculateMonthDays();
-        newDate.dayNumber = mode(newDate.dayNumber - ((newDate.calculateMonthDays() - newDate.day + this.day) % 7), 7);        newDate._updateInformation();
-        return newDate;
-    }
+
     nextYear() {
         const newDate = this.copy();
         newDate.year++;
@@ -76,15 +58,7 @@ class PersianDate {
         newDate._updateInformation();
         return newDate;
     }
-    previousYear() {
-        const newDate = this.copy();
-        newDate.year--;
-        if (newDate.month === 12 && newDate.day === 30 && !newDate.isLeapYear()) newDate.day = 29;
-        const newDayNumber = mode(newDate.dayNumber - (newDate.isLeapYear() ? 2 : 1), 7);
-        newDate.dayNumber = newDayNumber;
-        newDate._updateInformation();
-        return newDate;
-    }
+
     next(unit, count = 1) {
         const lowerCaseUnit = this._unitCheck(unit);
         let currentDate = this.copy();
@@ -116,6 +90,48 @@ class PersianDate {
         }
         return currentDate;
     }
+
+    
+    // Previous
+    
+    previousDay() {
+        const newDate = this.copy();
+        newDate.day--;
+        newDate.dayNumber = newDate.dayNumber > 0 ? newDate.dayNumber - 1 : 6;
+        if (newDate.day < 1) {
+            if (newDate.month === 1) newDate.setDate(newDate.year - 1, 12, newDate.isLeapYear(newDate.year - 1) ? 30 : 29)
+            else newDate.setDate(newDate.year, newDate.month - 1, newDate.calculateMonthDays());
+        }
+        else newDate._updateInformation();
+        return newDate;
+    }
+
+    previousWeek() {
+        return this.previous('day', 7);
+    }
+
+    previousMonth() {
+        const newDate = this.copy();
+        newDate.month--;
+        if (newDate.month < 1) {
+            newDate.month = 12;
+            newDate.year--;
+        }
+        if (newDate.day > newDate.calculateMonthDays()) newDate.day = newDate.calculateMonthDays();
+        newDate.dayNumber = mode(newDate.dayNumber - ((newDate.calculateMonthDays() - newDate.day + this.day) % 7), 7);        newDate._updateInformation();
+        return newDate;
+    }
+
+    previousYear() {
+        const newDate = this.copy();
+        newDate.year--;
+        if (newDate.month === 12 && newDate.day === 30 && !newDate.isLeapYear()) newDate.day = 29;
+        const newDayNumber = mode(newDate.dayNumber - (newDate.isLeapYear() ? 2 : 1), 7);
+        newDate.dayNumber = newDayNumber;
+        newDate._updateInformation();
+        return newDate;
+    }
+
     previous(unit, count = 1) {
         const lowerCaseUnit = this._unitCheck(unit);
         let currentDate = this.copy();
@@ -147,6 +163,10 @@ class PersianDate {
         }
         return currentDate;
     }
+
+
+    // Get
+    
     getWeekDays() {
         let currentDay = this.startOf('week');
         const days = [];
@@ -156,6 +176,7 @@ class PersianDate {
         }
         return days;
     }
+
     getMonthDays() {
         const firstDayNumber = mode(this.dayNumber - (this.day - 1), 7);
         const days = Array.from({ length: this.monthDays }, (_, index) =>
@@ -163,6 +184,7 @@ class PersianDate {
         );
         return days;
     }
+
     getYearDays(wholeYear = false) {
         let nthDayOfYear = this.nthDayOfYear();
         let firstDayNumber = mode(this.dayNumber - (nthDayOfYear - 1), 7);
@@ -175,6 +197,7 @@ class PersianDate {
         }
         return days;
     }
+
     getDayNumber() {
         const today = PersianDate.today();
         const diff = today.isBefore(this)
@@ -183,7 +206,8 @@ class PersianDate {
 
         return mode(today.dayNumber + diff, 7);
     }
-    get(unit, daysCount = 0) {
+
+    get(unit, daysCount = 1) {
         const customUnits = ['next', 'previous'];
         const lowerCaseUnit = this._unitCheck(unit, [], customUnits);
         if (unit === 'day') return [this.copy()];
@@ -191,13 +215,17 @@ class PersianDate {
             let currentDate = this.copy();
             const days = [];
             for (let a = 0 ; a < daysCount ; a++) {
-                days.push(currentDate.copy());
                 currentDate = currentDate[`${unit}Day`]();
+                days.push(currentDate.copy());
             }
             return days;
         }
         else return this[`get${capitalize(lowerCaseUnit)}Days`]()
     }
+
+
+    // Start & End of unit
+
     startOf(unit) {
         const lowerCaseUnit = this._unitCheck(unit, ['day']);
         switch (lowerCaseUnit) {
@@ -217,6 +245,7 @@ class PersianDate {
                 break;
         }
     }
+
     endOf(unit) {
         const lowerCaseUnit = this._unitCheck(unit, ['day']);
         switch (lowerCaseUnit) {
@@ -225,7 +254,7 @@ class PersianDate {
             case 'month': {
                 const diffDays = this.calculateMonthDays() - this.day;
                 const newDayNumber = (this.dayNumber + diffDays) % 7;
-                return new PersianDate(this.year, this.month, 1, newDayNumber)
+                return new PersianDate(this.year, this.month, this.calculateMonthDays(), newDayNumber)
             }
             case 'year': {
                 const diffDays = this.calculateYearDays() - this.nthDayOfYear();
@@ -236,35 +265,37 @@ class PersianDate {
                 break;
         }
     }
-    nthDayOfYear() {
-        let nth = 0;
-        for (let month = 1 ; month < this.month ; month++) {
-            nth += this.calculateMonthDays(month);
-        }
-        nth += this.day;
-        return nth;
-    }
-    toNumber() {
-        return this.year * 10000 + this.month * 100 + this.day;
-    }
+
+
+    // Compare
+    
     isBefore(otherDate) {
         return this.toNumber() < otherDate.toNumber();
     }
+
     isAfter(otherDate) {
         return this.toNumber() > otherDate.toNumber();
     }
+
     isSame(otherDate) {
         return this.toNumber() === otherDate.toNumber();
     }
+
     isToday() {
         return this.isSame(PersianDate.today());
     }
+
     isBeforeToday() {
         return this.isBefore(PersianDate.today());
     }
+
     isAfterToday() {
         return this.isAfter(PersianDate.today());
     }
+
+
+    // Information
+
     isLeapYear(year = this.year) {
         const breaks = [-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178];
         let jp = breaks[0], jump = 0;
@@ -278,6 +309,30 @@ class PersianDate {
         if (jump - n < 6) n += Math.floor((jump + 4) / 33) * 33 - jump;
         return (((n + 1) % 33) % 4 === 0) && !(jump === 33 && ((n + 1) % 33) === 1);
     }
+
+    nthDayOfYear() {
+        let nth = 0;
+        for (let month = 1 ; month < this.month ; month++) {
+            nth += this.calculateMonthDays(month);
+        }
+        nth += this.day;
+        return nth;
+    }
+
+    calculateMonthDays(month = this.month, year = this.year) {
+        if (month <= 6) return 31;
+        if (month < 12) return 30;
+        return this.isLeapYear(year) ? 30 : 29;
+    }
+
+    calculateYearDays(year = this.year) {
+        return this.isLeapYear(year) ? 366 : 365;
+    }
+    
+    toNumber() {
+        return this.year * 10000 + this.month * 100 + this.day;
+    }
+
     diff(otherDate) {
         let olderDate = this.isBefore(otherDate) ? this : otherDate;
         let newerDate = this.isAfter(otherDate) ? this : otherDate;
@@ -294,17 +349,34 @@ class PersianDate {
             return days;
         }
     }
-    calculateMonthDays(month = this.month, year = this.year) {
-        if (month <= 6) return 31;
-        if (month < 12) return 30;
-        return this.isLeapYear(year) ? 30 : 29;
+    
+    setDate(year, month, day, dayNumber = null) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.dayNumber = dayNumber ?? this.getDayNumber();
+        this._updateInformation();
     }
-    calculateYearDays(year = this.year) {
-        return this.isLeapYear(year) ? 366 : 365;
-    }
+
     copy() {
         return new PersianDate(this.year, this.month, this.day, this.dayNumber);
     }
+
+    // Output
+
+    toString() {
+        return this.toDate();
+    }
+
+    toPersianString(showYear = false) {
+        return `${this.day} ${this.monthName}${showYear ? ' ' + this.year : ''}`;
+    }
+
+    toDate(seprator = '-') {
+        return `${this.year.toString()}${seprator}${this.month.toString().padStart(2, '0')}${seprator}${this.day.toString().padStart(2, '0')}`
+    }
+
+
     _unitCheck(unit, invalids = [], valids = []) {
         const lowerCaseUnit = unit;
         if (
@@ -317,23 +389,11 @@ class PersianDate {
         }
         return lowerCaseUnit;
     }
-    setDate(year, month, day, dayNumber = null) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.dayNumber = dayNumber ?? this.getDayNumber();
-        this._updateInformation();
-    }
+    
     _updateInformation() {
         this.dayName = weekDays[this.dayNumber];
         this.monthName = persianMonths[this.month - 1];
         this.monthDays = this.calculateMonthDays();
-    }
-    toString(showYear = false) {
-        return `${this.day} ${this.monthName}${showYear ? ' ' + this.year : ''}`;
-    }
-    toDate(seprator = '-') {
-        return `${this.year.toString()}${seprator}${this.month.toString().padStart(2, '0')}${seprator}${this.day.toString().padStart(2, '0')}`
     }
 }
 

@@ -1,0 +1,34 @@
+{
+  "name": "tanbal-persian-date",
+  "version": "1.0.0",
+  "description": "A JavaScript library for working with Persian dates",
+  "keywords": [
+    "persian-date",
+    "jalali",
+    "jalali-date",
+    "shamsi",
+    "shamsi-date",
+    "persian-calendar",
+    "javascript"
+  ],
+  "homepage": "https://github.com/tanbal8/persian-date#readme",
+  "bugs": {
+    "url": "https://github.com/tanbal8/persian-date/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanbal8/persian-date.git"
+  },
+  "files": [
+    "persianDate.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "author": "Ali Radmard",
+  "type": "module",
+  "main": "persianDate.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
